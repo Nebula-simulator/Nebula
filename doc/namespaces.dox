@@ -1,0 +1,55 @@
+/**
+ * \namespace nbl
+ * \brief Encapsulating namespace for all of Nebula's core functionality.
+ */
+
+/**
+ * \namespace nbl::cuda
+ * \brief CUDA-related utility functions.
+ */
+
+/**
+ * \namespace nbl::util
+ * \brief General utilities intended to be used in simulations, abstracting
+ * different CPU/GPU implementations.
+ *
+ * These classes expose a consistent interface for CPU and GPU code, and
+ * specialize to the correct implementation by means of a boolean template
+ * parameter called `gpu_flag`.
+ */
+
+/**
+ * \namespace nbl::nd_array
+ * \brief n-dimensional array functionality.
+ *
+ * The class nbl::nd_array::nd_array just stores n-dimensional data, and
+ * provides simple linear interpolation or direct data access. The class
+ * nbl::nd_array::nd_array_ax associates a physical axis with each dimension.
+ */
+
+/**
+ * \namespace nbl::geometry
+ * \brief Classes that contain the geometry in a simulation.
+ */
+
+/**
+ * \namespace nbl::scatter
+ * \brief Types of scattering events that may be used in a simulation.
+ *
+ * Such classes have two main public member functions that are queried by the
+ * simulation driver:
+ *   - `sample_path(particle const &, random_generator&)` to sample a (possibly,
+ *     but not necessarily, random) free path length for this event.
+ *   - `execute(particle_manager&, particle_index_t, random_generator&)` to
+ *     perform the event, if the driver chooses that his event is to be
+ *     performed.
+ */
+
+/**
+ * \namespace nbl::drivers
+ * \brief Drivers connect the various parts in a simulation.
+ *
+ * A driver's job is to query the geometry and scattering mechanisms to
+ * determine the next scattering event, move the particle to the correct
+ * position and call the appropriate scattering code.
+ */
