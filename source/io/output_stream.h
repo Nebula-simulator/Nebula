@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <array>
 #include <assert.h>
+#ifdef _WIN32
+	#include <fcntl.h>
+	#include <io.h>
+#endif
 
 /**
  * \brief Thread-safe binary output stream.
@@ -31,6 +35,10 @@ public:
 		if (filename == "stdout")
 		{
 			file = &std::cout;
+			// By default stdout is in text mode on Windows
+			#ifdef _WIN32
+				_setmode(_fileno(stdout), _O_BINARY);
+			#endif
 			own_file = false;
 		}
 		else
