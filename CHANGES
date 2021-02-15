@@ -2,6 +2,7 @@ nebula changelog
 
 1.0.1
   - Add support for Windows (thanks Alexander Skorikov)
+  - Support CUDA Toolkit 11 (thanks Alexander Skorikov)
 
 1.0.0 (2020-06-02)
   - Initial release

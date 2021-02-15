@@ -1,7 +1,7 @@
 add_subdirectory(io)
 add_subdirectory(geometry/octree)
 
-if(CMAKE_CUDA_COMPILER)
+if(USE_CUDA)
 	add_executable(nebula_gpu gpu_main.cu
 		$<TARGET_OBJECTS:io>
 		$<TARGET_OBJECTS:octree>)
