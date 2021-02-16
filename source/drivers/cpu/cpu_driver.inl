@@ -7,10 +7,10 @@ cpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::cpu_driver(
 	intersect_t intersect,
 	material_manager_t const & materials,
 	geometry_manager_t const & geometry,
-	real energy_threshold,
+	real min_energy, real max_energy,
 	seed_t seed
 ) :
-	energy_threshold(energy_threshold),
+	_min_energy(min_energy), _max_energy(max_energy),
 	_particles(particle_manager_t::create()),
 	_materials(materials),
 	_geometry(geometry),
@@ -96,7 +96,8 @@ void cpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::init(particle_
 
 		// Terminate if we are below the energy threshold
 		// (which is with respect to the vacuum energy)
-		if (this_particle.kin_energy < this_material.barrier + energy_threshold)
+		if (this_particle.kin_energy < this_material.barrier + _min_energy ||
+			this_particle.kin_energy > this_material.barrier + _max_energy)
 		{
 			_particles.terminate(particle_idx);
 			return;

@@ -56,7 +56,8 @@ struct worker_data
 	uint32_t capacity;
 	uint32_t frame_size;
 	uint32_t batch_size;
-	real energy_threshold;
+	real min_energy;
+	real max_energy;
 
 	std::vector<uint32_t> running_count;
 
@@ -101,7 +102,7 @@ void worker_thread(worker_data& data,
 	intersect_t inter;
 	driver d(data.capacity,
 		inter, materials, geometry,
-		data.energy_threshold, seed);
+		data.min_energy, data.max_energy, seed);
 
 
 	// Do prescan, if desired
@@ -260,7 +261,8 @@ int main(int argc, char** argv)
 	// Setup worker_data structure
 	worker_data data("stdout", timer);
 	data.capacity = capacity;
-	data.energy_threshold = energy_threshold;
+	data.min_energy = energy_threshold;
+	data.max_energy = std::numeric_limits<real>::infinity();
 	data.prescan_size = prescan_size;
 	data.batch_factor = batch_factor;
 
@@ -343,6 +345,7 @@ int main(int argc, char** argv)
 			"    cstool version: " << material.get_property_string("cstool_version") << "\n";
 	}
 	timer.stop("Loading materials");
+	data.max_energy = data.materials.get_max_energy();
 
 	{
 		std::lock_guard<std::mutex> lg(data.cv_m);

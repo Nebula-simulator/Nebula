@@ -22,7 +22,7 @@ namespace kernels
 		material_manager_t materials,
 		geometry_manager_t geometry,
 		util::random_generator<true>* curand_states,
-		real energy_threshold);
+		real min_energy, real max_energy);
 
 	template<typename particle_manager_t, typename material_manager_t, typename geometry_manager_t, typename intersect_t>
 	__global__ void intersect(particle_manager_t particles,
@@ -53,10 +53,10 @@ CPU gpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::gpu_driver(
 	intersect_t intersect,
 	material_manager_t const & materials,
 	geometry_manager_t const & geometry,
-	real energy_threshold,
+	real min_energy, real max_energy,
 	seed_t seed
 ) :
-	energy_threshold(energy_threshold),
+	_min_energy(min_energy), _max_energy(max_energy),
 	_particles(particle_manager_t::create(particle_capacity)),
 	_materials(materials),
 	_geometry(geometry),
@@ -323,7 +323,8 @@ template<typename scatter_list_t,
 CPU void gpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::init()
 {
 	kernels::init<<<_num_blocks, _threads_per_block>>>(
-		_particles, _materials, _geometry, curand_states, energy_threshold
+		_particles, _materials, _geometry, curand_states,
+		_min_energy, _max_energy
 	);
 }
 
@@ -405,7 +406,7 @@ __global__ void kernels::init(
 	material_manager_t materials,
 	geometry_manager_t geometry,
 	util::random_generator<true>* curand_states,
-	real energy_threshold)
+	real min_energy, real max_energy)
 {
 	const auto particle_idx = threadIdx.x + blockIdx.x*blockDim.x;
 	if(!particles.exists(particle_idx))
@@ -437,9 +438,10 @@ __global__ void kernels::init(
 	{
 		const auto this_material = materials[this_material_idx];
 
-		// Terminate if we are below the energy threshold
+		// Terminate if we are above or below the energy threshold
 		// (which is with respect to the vacuum energy)
-		if (this_particle.kin_energy < this_material.barrier + energy_threshold)
+		if (this_particle.kin_energy < this_material.barrier + min_energy ||
+			this_particle.kin_energy > this_material.barrier + max_energy)
 		{
 			particles.terminate(particle_idx);
 			return;

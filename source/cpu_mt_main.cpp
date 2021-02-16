@@ -158,7 +158,9 @@ int main(int argc, char** argv)
 	auto sim_loop = [&pool, &out_file, &pixels,
 		&geometry, &inter, &materials, energy_threshold](uint32_t seed)
 	{
-		driver d(inter, materials, geometry, energy_threshold, seed);
+		driver d(
+			inter, materials, geometry,
+			energy_threshold, materials.get_max_energy(), seed);
 		output_buffer buff(out_file, 1024*(7*sizeof(float) + 2*sizeof(int)));
 
 		for (;;)

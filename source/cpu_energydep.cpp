@@ -165,7 +165,9 @@ int main(int argc, char** argv)
 	auto sim_loop = [&pool, &detect_out, &deposit_out, &pixels,
 			&geometry, &inter, &materials, energy_threshold](uint32_t seed)
 	{
-		driver d(inter, materials, geometry, energy_threshold, seed);
+		driver d(
+			inter, materials, geometry,
+			energy_threshold, materials.get_max_energy(), seed);
 		output_buffer detect_buff(detect_out,
 			1024*(7*sizeof(float) + 2*sizeof(int)));
 		output_buffer deposit_buff(deposit_out,

@@ -30,9 +30,9 @@ public:
 		intersect_t intersect,
 		material_manager_t const & materials,
 		geometry_manager_t const & geometry,
-		real energy_threshold = 0,
+		real min_energy, real max_energy,
 		seed_t seed = util::random_generator<false>::default_seed)
-	: base_t(intersect, materials, geometry, energy_threshold, seed)
+	: base_t(intersect, materials, geometry, min_energy, max_energy, seed)
 	{}
 
 	/// Perform a single iteration of the simulation for all particles.
