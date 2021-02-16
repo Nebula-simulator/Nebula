@@ -1,7 +1,7 @@
 #ifndef __GPU_DRIVER_H_
 #define __GPU_DRIVER_H_
 
-#include "../../core/material_manager.h"
+#include "../../core/gpu_material_manager.h"
 #include "../../common/util/random.h"
 #include "../../common/work_pool.h"
 #include "gpu_particle_manager.h"
@@ -35,7 +35,7 @@ public:
 		"Only the first scattering mechanism may create secondaries in GPU code");
 
 	using material_t = material<scatter_list_t>;
-	using material_manager_t = material_manager<material_t, true>;
+	using material_manager_t = gpu_material_manager<material_t>;
 	using particle_manager_t = gpu_particle_manager<material_manager_t>;
 
 	using particle_index_t = typename particle_manager_t::particle_index_t;
@@ -46,15 +46,17 @@ public:
 	 * \brief Constructor.
 	 *
 	 * \param particle_capacity Maximum number of particles the simulation may have.
-	 * \param geom              Geometry manager, holding the simulation geometry.
-	 * \param inter             Instance of the intersection handler.
+	 * \param intersect         Instance of the intersection handler.
 	 * \param materials         List of materials in the simulation.
+	 * \param geometry          Geometry manager, holding the simulation geometry.
 	 * \param energy_threshold  Energy threshold w.r.t. the vacuum level below
 	 *                          which particles must be terminated.
 	 * \param seed              Seed for the random number generator.
 	 */
-	CPU gpu_driver(particle_index_t particle_capacity, geometry_manager_t geom,
-		intersect_t inter, std::vector<material_t> materials,
+	CPU gpu_driver(particle_index_t particle_capacity,
+		intersect_t intersect,
+		material_manager_t const & materials,
+		geometry_manager_t const & geometry,
 		real energy_threshold = 0,
 		seed_t seed = util::random_generator<true>::default_seed);
 	CPU ~gpu_driver();
@@ -182,7 +184,7 @@ public:
 
 private:
 	particle_manager_t _particles;
-	material_manager_t _materials;
+	material_manager_t const & _materials;
 	geometry_manager_t _geometry;
 	intersect_t _intersect;
 

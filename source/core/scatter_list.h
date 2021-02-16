@@ -28,6 +28,11 @@ class scatter_list : public nbl::tuple::tuple<scatter_types...>
 {
 public:
 	/**
+	 * \brief Default constructor
+	 */
+	scatter_list() = default;
+
+	/**
 	 * \brief Constructor
 	 */
 	CPU scatter_list(scatter_types... sc)

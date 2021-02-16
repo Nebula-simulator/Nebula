@@ -23,6 +23,7 @@ namespace detail
 	template<size_t, typename T>
 	struct tuple_element
 	{
+		tuple_element() = default;
 		tuple_element(T value) : value_(value) {}
 		T value_;
 	};
@@ -33,6 +34,7 @@ namespace detail
 	struct tuple_impl<index_sequence<indices...>, types...>
 		: tuple_element<indices, types>...
 	{
+		explicit tuple_impl() = default;
 		explicit tuple_impl(types... elements)
 			: tuple_element<indices, types>(elements)...
 		{}
@@ -62,6 +64,11 @@ struct tuple
 	 * \brief The type this class inherits from
 	 */
 	using base_t = detail::tuple_impl<make_index_sequence<sizeof...(types)>, types...>;
+
+	/**
+	 * \brief Default constructor
+	 */
+	tuple() = default;
 
 	/**
 	 * \brief Construct from elements.

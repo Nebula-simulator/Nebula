@@ -50,15 +50,15 @@ template<typename scatter_list_t,
 >
 CPU gpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::gpu_driver(
 	particle_index_t particle_capacity,
-	geometry_manager_t geometry,
 	intersect_t intersect,
-	std::vector<material_t> materials,
+	material_manager_t const & materials,
+	geometry_manager_t const & geometry,
 	real energy_threshold,
 	seed_t seed
 ) :
 	energy_threshold(energy_threshold),
 	_particles(particle_manager_t::create(particle_capacity)),
-	_materials(material_manager_t::create(materials)),
+	_materials(materials),
 	_geometry(geometry),
 	_intersect(intersect),
 	_num_blocks(1 + particle_capacity/_threads_per_block)
@@ -95,7 +95,6 @@ template<typename scatter_list_t,
 CPU gpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::~gpu_driver()
 {
 	particle_manager_t::destroy(_particles);
-	material_manager_t::destroy(_materials);
 	cudaFree(curand_states);
 
 	cudaFree(buffer_din_data);

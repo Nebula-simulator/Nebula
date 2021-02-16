@@ -4,15 +4,15 @@ template<typename scatter_list_t,
 	typename intersect_t,
 	typename geometry_manager_t>
 cpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::cpu_driver(
-	geometry_manager_t geometry,
 	intersect_t intersect,
-	std::vector<material_t> const & materials,
+	material_manager_t const & materials,
+	geometry_manager_t const & geometry,
 	real energy_threshold,
 	seed_t seed
 ) :
 	energy_threshold(energy_threshold),
 	_particles(particle_manager_t::create()),
-	_materials(material_manager_t::create(materials)),
+	_materials(materials),
 	_geometry(geometry),
 	_intersect(intersect),
 	rand_state(seed)
@@ -25,7 +25,6 @@ template<typename scatter_list_t,
 cpu_driver<scatter_list_t, intersect_t, geometry_manager_t>::~cpu_driver()
 {
 	particle_manager_t::destroy(_particles);
-	material_manager_t::destroy(_materials);
 }
 
 template<typename scatter_list_t,

@@ -22,16 +22,17 @@ public:
 
 	using typename base_t::particle_index_t;
 	using typename base_t::material_t;
+	using typename base_t::material_manager_t;
 	using typename base_t::seed_t;
 
 	/// Constructor
 	energydeposit_cpu_driver(
+		intersect_t intersect,
+		material_manager_t const & materials,
 		geometry_manager_t const & geometry,
-		intersect_t const & intersect,
-		std::vector<material_t> const & materials,
 		real energy_threshold = 0,
 		seed_t seed = util::random_generator<false>::default_seed)
-	: base_t(geometry, intersect, materials, energy_threshold, seed)
+	: base_t(intersect, materials, geometry, energy_threshold, seed)
 	{}
 
 	/**

@@ -31,22 +31,6 @@ using driver = nbl::drivers::energydeposit_cpu_driver<
 	geometry_t
 >;
 
-// Get maximal energy accepted by all material files
-real get_max_energy(std::vector<material_t> const & materials)
-{
-	if (materials.size() == 0)
-		return 0;
-
-	real max_energy = std::numeric_limits<real>::infinity();
-	for (auto const & mat : materials)
-	{
-		const real e = mat.get_max_energy();
-		if (e < max_energy)
-			max_energy = e;
-	}
-	return max_energy;
-}
-
 int main(int argc, char** argv)
 {
 	// Print version information
@@ -127,11 +111,11 @@ int main(int argc, char** argv)
 	// Load materials
 	std::clog << "Loading materials..." << std::endl;
 	timer.start();
-	std::vector<material_t> materials;
+	nbl::cpu_material_manager<material_t> materials;
 	for (size_t parameter_idx = 2; parameter_idx < pos_flags.size(); ++parameter_idx)
 	{
 		nbl::hdf5_file material(pos_flags[parameter_idx]);
-		materials.push_back(material_t(material));
+		materials.add(material);
 
 		std::clog << "  Material " << (parameter_idx - 2) << ":\n"
 			"    Name: " << material.get_property_string("name") << "\n"
@@ -144,7 +128,7 @@ int main(int argc, char** argv)
 	std::clog << "Loading primary electrons..." << std::endl;
 	timer.start();
 	std::vector<particle> primaries; std::vector<int2> pixels;
-	std::tie(primaries, pixels) = nbl::load_pri_file(pos_flags[1], geometry.AABB_min(), geometry.AABB_max(), get_max_energy(materials));
+	std::tie(primaries, pixels) = nbl::load_pri_file(pos_flags[1], geometry.AABB_min(), geometry.AABB_max(), materials.get_max_energy());
 	timer.stop("Loading primary electrons");
 
 	if (primaries.empty())
@@ -181,7 +165,7 @@ int main(int argc, char** argv)
 	auto sim_loop = [&pool, &detect_out, &deposit_out, &pixels,
 			&geometry, &inter, &materials, energy_threshold](uint32_t seed)
 	{
-		driver d(geometry, inter, materials, energy_threshold, seed);
+		driver d(inter, materials, geometry, energy_threshold, seed);
 		output_buffer detect_buff(detect_out,
 			1024*(7*sizeof(float) + 2*sizeof(int)));
 		output_buffer deposit_buff(deposit_out,

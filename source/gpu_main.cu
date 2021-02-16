@@ -32,22 +32,6 @@ using driver = nbl::drivers::gpu_driver<
 	geometry_t
 >;
 
-// Get maximal energy accepted by all material files
-real get_max_energy(std::vector<cpu_material_t> const & materials)
-{
-	if (materials.size() == 0)
-		return 0;
-
-	real max_energy = std::numeric_limits<real>::infinity();
-	for (auto const & mat : materials)
-	{
-		const real e = mat.get_max_energy();
-		if (e < max_energy)
-			max_energy = e;
-	}
-	return max_energy;
-}
-
 struct worker_data
 {
 	worker_data(
@@ -60,7 +44,7 @@ struct worker_data
 	std::mutex cv_m;
 
 	nbl::geometry::octree_builder::linearized_octree geometry;
-	std::vector<cpu_material_t> materials;
+	nbl::cpu_material_manager<cpu_material_t> materials;
 	work_pool primaries;
 	std::vector<int2> pixels;
 
@@ -97,10 +81,11 @@ void worker_thread(worker_data& data,
 	cudaSetDevice(gpu_id);
 
 	// Upload geometry
-	std::unique_lock<std::mutex> lk(data.cv_m);
-	data.cv.wait(lk, [&data]() { return data.status >= worker_data::status_t::geometry_loaded; });
-	lk.unlock();
-
+	{
+		std::unique_lock<std::mutex> lk(data.cv_m);
+		data.cv.wait(lk, [&data]() { return data.status >= worker_data::status_t::geometry_loaded; });
+		lk.unlock();
+	}
 	geometry_t geometry = geometry_t::create(data.geometry);
 
 
@@ -110,16 +95,12 @@ void worker_thread(worker_data& data,
 		data.cv.wait(lk, [&data]{ return data.status >= worker_data::status_t::materials_loaded; });
 		lk.unlock();
 	}
-
-	std::vector<gpu_material_t> materials;
-	for (auto const & cpumat : data.materials)
-		materials.push_back(gpu_material_t(cpumat));
-
+	auto materials = nbl::gpu_material_manager<gpu_material_t>::create(data.materials);
 
 	// Create driver
 	intersect_t inter;
 	driver d(data.capacity,
-		geometry, inter, materials,
+		inter, materials, geometry,
 		data.energy_threshold, seed);
 
 
@@ -229,6 +210,9 @@ void worker_thread(worker_data& data,
 			break;
 	}
 	buff.flush();
+
+	geometry_t::destroy(geometry);
+	nbl::gpu_material_manager<gpu_material_t>::destroy(materials);
 }
 
 
@@ -352,7 +336,7 @@ int main(int argc, char** argv)
 	for (size_t parameter_idx = 2; parameter_idx < pos_flags.size(); ++parameter_idx)
 	{
 		nbl::hdf5_file material(pos_flags[parameter_idx]);
-		data.materials.push_back(cpu_material_t(material));
+		data.materials.add(material);
 
 		std::clog << "  Material " << (parameter_idx - 2) << ":\n"
 			"    Name: " << material.get_property_string("name") << "\n"
@@ -371,7 +355,7 @@ int main(int argc, char** argv)
 	std::clog << "Loading primary electrons..." << std::endl;
 	timer.start();
 	std::vector<particle> primaries;
-	std::tie(primaries, data.pixels) = nbl::load_pri_file(pos_flags[1], data.geometry.AABB_min(), data.geometry.AABB_max(), get_max_energy(data.materials));
+	std::tie(primaries, data.pixels) = nbl::load_pri_file(pos_flags[1], data.geometry.AABB_min(), data.geometry.AABB_max(), data.materials.get_max_energy());
 	if (sort_primaries)
 		nbl::sort_pri_file(primaries, data.pixels);
 	nbl::prescan_shuffle(primaries, data.pixels, prescan_size);

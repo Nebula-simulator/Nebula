@@ -2,6 +2,7 @@
 #define __BOUNDARY_INTERSECT_H_
 
 #include "../core/triangle.h"
+#include "../core/cpu_material_manager.h"
 
 /**
  * \brief Material boundary intersection.
@@ -75,25 +76,25 @@ struct boundary_intersect
 		//   DETECTOR_LT/GE50 detect under certain circumstances.
 		//     If not detected, they pass through as if no intersection event has taken place.
 		switch (material_idx_out) {
-		case material_manager::DETECTOR:
+		case nbl::special_materials::DETECTOR:
 			particle_mgr.detect(particle_idx);
 			return;
-		case material_manager::DETECTOR_LT50:
+		case nbl::special_materials::DETECTOR_LT50:
 			if (this_particle.kin_energy < 50)
 				particle_mgr.detect(particle_idx);
 			return;
-		case material_manager::DETECTOR_GE50:
+		case nbl::special_materials::DETECTOR_GE50:
 			if (this_particle.kin_energy >= 50)
 				particle_mgr.detect(particle_idx);
 			return;
-		case material_manager::TERMINATOR:
+		case nbl::special_materials::TERMINATOR:
 			particle_mgr.terminate(particle_idx);
 			return;
-		case material_manager::MIRROR:
+		case nbl::special_materials::MIRROR:
 			this_particle.dir = normalised_dir - 2*last_triangle_normal*cos_theta;
 			particle_mgr[particle_idx] = this_particle;
 			return;
-		case material_manager::NOP:
+		case nbl::special_materials::NOP:
 			return;
 		default:
 			break;

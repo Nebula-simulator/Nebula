@@ -79,7 +79,7 @@ public:
 	 * TODO ignore_material datatype
 	 */
 	inline PHYSICS intersect_event propagate(vec3 start, vec3 direction, real distance,
-		triangle const * ignore_triangle, int ignore_material);
+		triangle const * ignore_triangle, int ignore_material) const;
 
 	/**
 	 * \brief Get the maximum distance that can be travelled inside the

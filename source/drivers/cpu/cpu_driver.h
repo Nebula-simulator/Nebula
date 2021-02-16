@@ -1,7 +1,7 @@
 #ifndef __CPU_DRIVER_H_
 #define __CPU_DRIVER_H_
 
-#include "../../core/material_manager.h"
+#include "../../core/cpu_material_manager.h"
 #include "../../common/util/random.h"
 #include "cpu_particle_manager.h"
 
@@ -30,7 +30,7 @@ class cpu_driver
 {
 public:
 	using material_t = material<scatter_list_t>;
-	using material_manager_t = material_manager<material_t, false>;
+	using material_manager_t = cpu_material_manager<material_t>;
 	using particle_manager_t = cpu_particle_manager<material_manager_t>;
 
 	using particle_index_t = typename particle_manager_t::particle_index_t;
@@ -77,16 +77,17 @@ protected:
 	/**
 	 * \brief Constructor.
 	 *
-	 * \param geometry         Geometry manager, holding the simulation geometry.
 	 * \param intersect        Instance of the intersection handler.
 	 * \param materials        List of materials in the simulation.
+	 * \param geometry         Geometry manager, holding the simulation geometry.
 	 * \param energy_threshold Energy threshold w.r.t. the vacuum level below
 	 *                         which particles must be terminated.
 	 * \param seed             Seed for the random number generator.
 	 */
-	cpu_driver(geometry_manager_t geometry,
+	cpu_driver(
 		intersect_t intersect,
-		std::vector<material_t> const & materials,
+		material_manager_t const & materials,
+		geometry_manager_t const & geometry,
 		real energy_threshold = 0,
 		seed_t seed = util::random_generator<false>::default_seed);
 
@@ -94,8 +95,8 @@ protected:
 	~cpu_driver();
 
 	particle_manager_t _particles;
-	material_manager_t _materials;
-	geometry_manager_t _geometry;
+	material_manager_t const & _materials;
+	geometry_manager_t const & _geometry;
 	intersect_t _intersect;
 
 	// Random number generator

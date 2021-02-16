@@ -31,7 +31,7 @@ PHYSICS bool octree<gpu_flag>::in_domain(vec3 pos) const
 
 template<bool gpu_flag>
 PHYSICS intersect_event octree<gpu_flag>::propagate(vec3 start, vec3 direction, real distance,
-	triangle const * ignore_triangle, int ignore_material)
+	triangle const * ignore_triangle, int ignore_material) const
 {
 	// Current (x, y, z) position in the octree, is updated as we travel through cells
 	vec3 current_position = start;
