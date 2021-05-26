@@ -1,6 +1,6 @@
 nebula changelog
 
-1.0.2
+1.0.2 (2021-05-26)
   - Fix bug where only partial simulations were done when a low number of primaries are provided (GPU version).
 
 1.0.1 (2021-02-16)
