@@ -177,14 +177,15 @@ void worker_thread(worker_data& data,
 
 	// Start simulation
 	d.allocate_input_buffers(data.batch_size);
+	d.push_to_buffer(data.primaries);
 	output_buffer buff(data.out_file, 1024*(7*sizeof(float) + 2*sizeof(int)));
 
 	for (;;)
 	{
 		// Copy the simulation to buffer,
 		// push new data into the simulation
-		d.buffer_detected();
 		d.push_to_simulation();
+		d.buffer_detected();
 		cudaDeviceSynchronize();
 
 		// Execute frame

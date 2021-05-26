@@ -1,5 +1,8 @@
 nebula changelog
 
+1.0.2
+  - Fix bug where only partial simulations were done when a low number of primaries are provided (GPU version).
+
 1.0.1 (2021-02-16)
   - Add support for Windows (thanks Alexander Skorikov)
   - Support CUDA Toolkit 11 (thanks Alexander Skorikov)
